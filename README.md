@@ -16,7 +16,7 @@ Script was built using [bun](https://bun.sh), but uses [node](https://nodejs.org
 
 ### 1. Project setup
 
-- Install the xml parser dependecy with
+Install the xml parser dependecy with
 ```bash
 bun i
 ```
@@ -25,14 +25,14 @@ or
 npm i
 ```
 
-- Copy the folders inside the [`One Pace` folder](https://github.com/SpykerNZ/one-pace-for-plex/tree/main/One%20Pace) from SpykerNZ's repo to `./data` folder.
+Copy the folders inside the [`One Pace` folder](https://github.com/SpykerNZ/one-pace-for-plex/tree/main/One%20Pace) from SpykerNZ's repo to `./data` folder.
 
-- Create a .env file at the root of this project with the following keys.
+Create a .env file at the root of this project with the following keys and your values.
 ``` bash
 PLEX_URL=<Plex local or remote url>
 PLEX_TOKEN=<Plex Auth Token>
-PLEX_LIBRARY_KEY=<Optional>
-PLEX_ONE_PACE_KEY=<Optional>
+PLEX_LIBRARY_KEY=<Optional to start>
+PLEX_ONE_PACE_KEY=<Optional to start>
 ```
 The plex auth token can be found with this [guide](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/).
 
