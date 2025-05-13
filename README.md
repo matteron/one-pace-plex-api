@@ -10,15 +10,19 @@ Also, please understand, this was written at 1 am.  The code ain't great.
 
 ## Instructions
 
-### 1. Install Bun
+### 0. Install a Javascript runtime
 
-[Follow the instruction to install bun](https://bun.sh)
+Script was built using [bun](https://bun.sh), but uses [node](https://nodejs.org) file api so anything that adheres to the node spec should work.
 
-### 2. Project setup
+### 1. Project setup
 
 - Install the xml parser dependecy with
+```bash
+bun i
 ```
-bun Install
+or
+```bash
+npm i
 ```
 
 - Copy the folders inside the [`One Pace` folder](https://github.com/SpykerNZ/one-pace-for-plex/tree/main/One%20Pace) from SpykerNZ's repo to `./data` folder.
@@ -34,16 +38,20 @@ The plex auth token can be found with this [guide](https://support.plex.tv/artic
 
 The script will guide you through getting your library keys and one pace key if they are missing.
 
-### 3. Download and Rename One Pace Files
+### 2. Download and Rename One Pace Files
 
 Follow the [install instructions](https://github.com/SpykerNZ/one-pace-for-plex/tree/main#install-instructions) from the original repo up to step 5.
 
-### 4. Run the script
+### 3. Run the script
+```bash
+bun start
 ```
-bun run start
+or
+```bash
+npm start
 ```
 
-### 5. Posters and tvshow.nfo
+### 4. Posters and tvshow.nfo
 This script doesn't handle posters in any way, so you'll need to go ahead and add those yourself.
 
 Additionally, it doesn't deal with the root tvshow.nfo file, so it won't add the summary and title to the show itself.

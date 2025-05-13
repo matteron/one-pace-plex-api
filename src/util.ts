@@ -12,7 +12,7 @@ import type {
 	SeasonPlexData,
 	UpdateData,
 } from "./types";
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { exit } from "node:process";
 
 export const acceptJson = {
@@ -103,9 +103,8 @@ export async function loadNfoData(): Promise<NfoData> {
 		const dir = await readdir("./data/" + season);
 		for (const fileName of dir) {
 			const filePath = dirPath + "/" + fileName;
-			const file = Bun.file(filePath);
-			const text = await file.text();
-			const parsed = parser.parse(text);
+			const file = await readFile(filePath, "utf-8");
+			const parsed = parser.parse(file);
 			if ("episodedetails" in parsed) {
 				const details: EpisodeNfoFile = parsed["episodedetails"];
 				if (!epMap.has(details.season)) {
