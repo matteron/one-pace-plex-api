@@ -60,3 +60,13 @@ export type UpdateData = {
 			summary: string;
 	  }
 );
+
+export type ResultCounts = {
+	seasons: number;
+	episodes: number;
+};
+
+export type Results = {
+	error: ResultCounts;
+	success: ResultCounts;
+};

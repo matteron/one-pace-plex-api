@@ -7,6 +7,7 @@ import type {
 	EpisodePlexData,
 	PlexMediaTypes,
 	PlexMetadataResponse,
+	ResultCounts,
 	SeasonNfoFile,
 	SeasonPlexData,
 	UpdateData,
@@ -15,8 +16,11 @@ import {
 	acceptJson,
 	buildMetadataFetch,
 	collectPendingUpdates,
+	emptyResults,
 	keyWizard,
 	loadNfoData,
+	logCodes,
+	logResult,
 } from "./src/util";
 
 const url = Bun.env.PLEX_URL;
@@ -46,6 +50,7 @@ if (!libKey || !onePaceShowKey) {
 		onePaceShowKey,
 	);
 
+	let results = emptyResults();
 	for (const { id, type, ...fields } of pendingUpdates) {
 		const params = new URLSearchParams();
 		params.append("type", type);
@@ -61,10 +66,26 @@ if (!libKey || !onePaceShowKey) {
 				method: "PUT",
 			},
 		);
-		if (updateRes.status === 200) {
-			console.log("\x1b[32m [ OK ] \x1b[0m" + fields.title);
-		} else {
-			console.log("\x1b[31m [FAIL] \x1b[0m" + fields.title);
-		}
+		results = logResult(updateRes, type, fields.title, results);
+	}
+
+	if (
+		!(
+			results.error.seasons ||
+			results.error.episodes ||
+			results.success.seasons ||
+			results.success.episodes
+		)
+	) {
+		console.log("Already up to date!");
+	} else {
+		const sLen = "Seasons".length;
+		const eLen = "Episodes".length;
+		console.log("\n Results | Seasons | Episodes");
+		const formatOutput = (code: string, count: ResultCounts) =>
+			` ${code}| ${(count.seasons + "").padStart(sLen)} | ${(count.episodes + "").padStart(eLen)}`;
+
+		console.log(formatOutput(logCodes.ok, results.success));
+		console.log(formatOutput(logCodes.fail, results.error));
 	}
 }

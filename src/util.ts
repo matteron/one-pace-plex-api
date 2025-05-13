@@ -6,6 +6,8 @@ import type {
 	NfoData,
 	PlexMediaTypes,
 	PlexMetadataResponse,
+	ResultCounts,
+	Results,
 	SeasonNfoFile,
 	SeasonPlexData,
 	UpdateData,
@@ -197,4 +199,43 @@ export async function collectPendingUpdates(
 		}
 	}
 	return pendingUpdates;
+}
+
+const baseCount: ResultCounts = {
+	seasons: 0,
+	episodes: 0,
+};
+export const emptyResults = (): Results => ({
+	error: { ...baseCount },
+	success: { ...baseCount },
+});
+
+export const logCodes = {
+	ok: "\x1b[32m [ OK ] \x1b[0m",
+	fail: "\x1b[31m [FAIL] \x1b[0m",
+};
+export function logResult(
+	res: Response,
+	type: UpdateData["type"],
+	title: string,
+	results: Results,
+) {
+	const resKey: keyof ResultCounts = type === "3" ? "seasons" : "episodes";
+	const {
+		resBucketKey,
+		logCode,
+	}: { resBucketKey: keyof Results; logCode: string } =
+		res.status === 200
+			? {
+					resBucketKey: "success",
+					logCode: logCodes.ok,
+				}
+			: {
+					resBucketKey: "error",
+					logCode: logCodes.fail,
+				};
+
+	console.log(`${logCode}${title}`);
+	results[resBucketKey][resKey] += 1;
+	return results;
 }
