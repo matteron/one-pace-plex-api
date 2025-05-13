@@ -56,3 +56,6 @@ This script doesn't handle posters in any way, so you'll need to go ahead and ad
 
 Additionally, it doesn't deal with the root tvshow.nfo file, so it won't add the summary and title to the show itself.
 You only have to do this once, so you can just open up the file and copy paste the data in there to the two appropriate fields in plex directly.
+
+## Todo
+I want to add the publish dates, but the source nfo files have a bunch of different formatted dates and I didn't want to normalize them because I was lazy.
