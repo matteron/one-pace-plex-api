@@ -8,11 +8,16 @@ Uses the data extracted by the [OnePaceOrganizer](https://github.com/ladyisatis/
 
 ## Instructions
 
-### 0. Install a Javascript runtime
-
+### 0. Install bun
 Script was built using [bun](https://bun.sh);
 
-### 1. Project setup
+### 1. Clone Repo
+Project included OnePaceOrganizer as a submodule.  So in order to clone it, you should use.
+```bash
+git clone --recurse-submodules git@github.com:matteron/one-pace-plex-api.git
+```
+
+### 2. Project setup
 
 Install the yaml parser dependecy with
 ```bash
@@ -30,18 +35,31 @@ The plex auth token can be found with this [guide](https://support.plex.tv/artic
 
 The script will guide you through getting your library keys and one pace key if they are missing.
 
-### 2. Download and Rename One Pace Files
-
-Follow the [install instructions](https://github.com/SpykerNZ/one-pace-for-plex/tree/main#install-instructions) from the original repo up to step 5.
-
 ### 3. Run the script
 ```bash
 bun start
 ```
-or
-```bash
-npm start
-```
 
-### 4. Posters and tvshow.nfo
-This script doesn't handle posters in any way, so you'll need to go ahead and add those yourself.
+As previously mentioned, the script will help you get your library and show keys, then will quit.
+Just run the script again to update data.
+
+### 4 (Optional) Extra Arguments
+There's a few optional arguments you can pass in for different functionality.
+| Argument | Operation |
+| --- | --- |
+| --r <path> | Rename files in <path> directory based on file's hash code. |
+| --p | Set show and season posters in plex |
+| --altShowPoster | Use the tvshow-alt.png poster |
+
+### 4 (Optional). Update data and rerun
+For future runs, you can update the data from OnePaceOrganizer with
+```bash
+git submodule update
+```
+Then just `bun start` again.
+
+## Notes
+
+- The file renaming is pretty basic, it looks up data based on the file's hash code at the end. Meaning if you don't have an up to date file or missing the hash in the name, it'll skip it.
+- Also, I've found some of the data is outdated after some episodes got added/removed in OnePace.  Just be attentive and do small batches and it should be fine.
+- In case you're wondering, Plex is smart enough to tell if a duplicate poster is being uploaded and won't save it.  So feel free to run it as much as you like.

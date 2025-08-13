@@ -84,7 +84,15 @@ export type EpisodePlexData = PlexData & EpisodeData;
 export type AnyPlexData = PlexData & SpecificData;
 
 export type UpdateData = {
+  logTitle: string;
   id: string;
   title?: string;
   summary?: string;
 } & SpecificData;
+
+export type LoadPoster = () => Promise<Uint8Array>;
+export type UpdatePoster = {
+  logTitle: string;
+  id: string;
+  poster: LoadPoster;
+};

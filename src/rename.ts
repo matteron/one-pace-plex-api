@@ -9,8 +9,8 @@ type Rename = {
   to: string;
 };
 
-export async function renameEpisodes(directory: string) {
-  const data = await loadEpisodesByHash();
+export async function renameEpisodes(subModulePath: string, directory: string) {
+  const data = await loadEpisodesByHash(subModulePath);
   const files = await readdir(directory);
 
   const res: Rename[] = [];

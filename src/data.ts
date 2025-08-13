@@ -7,6 +7,7 @@ import type {
 } from "./types";
 import { parse } from "yaml";
 import { readdir } from "node:fs/promises";
+import path from "node:path";
 
 type YamlData = {
   show: TvShowYaml;
@@ -19,28 +20,30 @@ type YamlData = {
     };
   };
 };
-export async function loadData(): Promise<YamlData> {
+export async function loadData(subModulePath: string): Promise<YamlData> {
+  const dataPath = path.join(subModulePath, "data/");
   const show = parse(
-    await Bun.file("./OnePaceOrganizer/data/tvshow.yml").text(),
+    await Bun.file(path.join(dataPath, "tvshow.yml")).text(),
   ) as TvShowYaml;
 
   const seasons = parse(
-    await Bun.file("./OnePaceOrganizer/data/seasons.yml").text(),
+    await Bun.file(path.join(dataPath, "seasons.yml")).text(),
   ) as AllSeasonsYaml;
 
-  const eps = await readdir("./OnePaceOrganizer/data/episodes/");
+  const epDir = path.join(dataPath, "episodes/");
+  const eps = await readdir(epDir);
 
   const res: YamlData = {
     show,
     seasons: {},
   };
 
-  for (const path of eps) {
-    if (!path.endsWith(".yml")) {
+  for (const epPath of eps) {
+    if (!epPath.endsWith(".yml")) {
       continue;
     }
     const ep = parse(
-      await Bun.file("./OnePaceOrganizer/data/episodes/" + path).text(),
+      await Bun.file(path.join(epDir, epPath)).text(),
     ) as EpisodeYaml;
 
     if (!ep.season) {
@@ -62,25 +65,28 @@ export async function loadData(): Promise<YamlData> {
 type EpisodesByHash = {
   [hash: string]: EpisodeYaml;
 };
-export async function loadEpisodesByHash(): Promise<EpisodesByHash> {
-  const eps = await readdir("./OnePaceOrganizer/data/episodes/");
+export async function loadEpisodesByHash(
+  subModulePath: string,
+): Promise<EpisodesByHash> {
+  const epDir = path.join(subModulePath, "/data/episodes/");
+  const eps = await readdir(epDir);
 
   const res: EpisodesByHash = {};
   const refs: {
     hash: string;
     reference: string;
   }[] = [];
-  for (const path of eps) {
-    if (!path.endsWith(".yml")) {
+  for (const epPath of eps) {
+    if (!epPath.endsWith(".yml")) {
       continue;
     }
-    const ep = parse(
-      await Bun.file("./OnePaceOrganizer/data/episodes/" + path).text(),
-    ) as EpisodeYaml | ReferenceYaml;
+    const ep = parse(await Bun.file(path.join(epDir, epPath)).text()) as
+      | EpisodeYaml
+      | ReferenceYaml;
 
     if ("reference" in ep) {
       refs.push({
-        hash: path.split(".yml")[0]!,
+        hash: epPath.split(".yml")[0]!,
         reference: ep.reference,
       });
       continue;
