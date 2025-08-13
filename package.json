@@ -1,17 +1,16 @@
 {
   "name": "one_pace_rename",
   "module": "index.ts",
-  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "yaml": "^2.8.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
   "scripts": {
     "start": "bun run index.ts"
   },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "fast-xml-parser": "^5.2.3"
-  }
+  "type": "module"
 }
