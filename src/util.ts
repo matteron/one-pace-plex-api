@@ -1,240 +1,79 @@
-import { XMLParser } from "fast-xml-parser";
 import type {
-	ApiBuilder,
-	EpisodeNfoFile,
-	EpisodePlexData,
-	NfoData,
-	PlexMediaTypes,
-	PlexMetadataResponse,
-	ResultCounts,
-	Results,
-	SeasonNfoFile,
-	SeasonPlexData,
-	UpdateData,
+  ApiBuilder,
+  PlexMediaContainer,
+  PlexMetadataResponse,
 } from "./types";
-import { readdir, readFile } from "node:fs/promises";
-import { exit } from "node:process";
 
 export const acceptJson = {
-	Accept: "application/json",
+  Accept: "application/json",
+};
+
+export const buildMetadataFetch = (api: ApiBuilder) => {
+  return async <T>(endpoint: string): Promise<T[]> => {
+    const fetchRes = await fetch(api(endpoint), {
+      headers: acceptJson,
+    });
+    const json = (await fetchRes.json()) as PlexMetadataResponse<T>;
+    const data = json.MediaContainer.Metadata;
+    return Array.isArray(data) ? data : [data];
+  };
 };
 
 export async function keyWizard(api: ApiBuilder) {
-	type Library = {
-		key: string;
-		type: string;
-		title: string;
-	};
-	const libraries: Library[] = (
-		await (
-			await fetch(api("library/sections"), {
-				headers: acceptJson,
-			})
-		).json()
-	).MediaContainer.Directory.sort((a: Library, b: Library) =>
-		a.key.localeCompare(b.key),
-	);
+  type Library = {
+    key: string;
+    type: string;
+    title: string;
+  };
+  const libraries: Library[] = (
+    (await (
+      await fetch(api("library/sections"), {
+        headers: acceptJson,
+      })
+    ).json()) as PlexMediaContainer<any>
+  ).MediaContainer.Directory.sort((a: Library, b: Library) =>
+    a.key.localeCompare(b.key),
+  );
 
-	let foundLibKey = "";
+  let foundLibKey = "";
 
-	while (!foundLibKey) {
-		console.log("\tKey | Library");
-		console.log("\t--- | -----");
-		for (const lib of libraries) {
-			console.log(
-				`\t${lib.key.padStart(3)} | ${lib.title} (${lib.type})`,
-			);
-		}
-		const entered = prompt("Enter Library Key: ");
-		const found = libraries.find((l) => l.key === entered);
-		if (found) {
-			foundLibKey = found.key;
-		}
-	}
+  while (!foundLibKey) {
+    console.log("\tKey | Library");
+    console.log("\t--- | -----");
+    for (const lib of libraries) {
+      console.log(`\t${lib.key.padStart(3)} | ${lib.title} (${lib.type})`);
+    }
+    const entered = prompt("Enter Library Key: ");
+    const found = libraries.find((l) => l.key === entered);
+    if (found) {
+      foundLibKey = found.key;
+    }
+  }
 
-	const shows: { title: string; ratingKey: string }[] = (
-		await (
-			await fetch(api(`library/sections/${foundLibKey}/all`), {
-				headers: acceptJson,
-			})
-		).json()
-	).MediaContainer.Metadata;
+  type Show = {
+    title: string;
+    ratingKey: string;
+  };
 
-	let foundShowKey = "";
-	while (!foundShowKey) {
-		const searchString = prompt(
-			"Enter show title: ",
-			"One Pace",
-		)?.toLowerCase();
+  const fetcher = buildMetadataFetch(api);
+  const shows = await fetcher<Show>(`library/sections/${foundLibKey}/all`);
 
-		const searchResult = shows.filter(
-			(i) => i.title.toLowerCase() === searchString,
-		);
-		if (searchResult.length === 1) {
-			foundShowKey = searchResult[0].ratingKey;
-		}
-	}
+  let foundShowKey = "";
+  while (!foundShowKey) {
+    const searchString = prompt(
+      "Enter show title: ",
+      "One Pace",
+    )?.toLowerCase();
 
-	console.log("\nPlease copy the following to your .env file then rerun:\n");
-	console.log(`PLEX_LIBRARY_KEY=${foundLibKey}`);
-	console.log(`PLEX_ONE_PACE_KEY=${foundShowKey}`);
-}
+    const searchResult = shows.filter(
+      (i) => i.title.toLowerCase() === searchString,
+    );
+    if (searchResult.length === 1) {
+      foundShowKey = searchResult[0]!.ratingKey;
+    }
+  }
 
-export async function loadNfoData(): Promise<NfoData> {
-	const parser = new XMLParser({
-		ignoreAttributes: false,
-		attributeNamePrefix: "",
-	});
-
-	const dirs = (
-		await readdir("./data", {
-			withFileTypes: true,
-		})
-	)
-		.filter((d) => !d.isFile())
-		.map((d) => d.name)
-		.sort();
-
-	const sMap = new Map<number, SeasonNfoFile>();
-	const epMap = new Map<number, Map<number, EpisodeNfoFile>>();
-
-	for (const season of dirs) {
-		const dirPath = "./data/" + season;
-		const dir = await readdir("./data/" + season);
-		for (const fileName of dir) {
-			const filePath = dirPath + "/" + fileName;
-			const file = await readFile(filePath, "utf-8");
-			const parsed = parser.parse(file);
-			if ("episodedetails" in parsed) {
-				const details: EpisodeNfoFile = parsed["episodedetails"];
-				if (!epMap.has(details.season)) {
-					epMap.set(details.season, new Map());
-				}
-				const eps = epMap.get(details.season)!;
-				eps.set(details.episode, details);
-			} else {
-				const details: SeasonNfoFile = parsed["season"];
-				sMap.set(details.seasonnumber, details);
-			}
-		}
-	}
-
-	return {
-		seasons: sMap,
-		episodes: epMap,
-	};
-}
-
-export const buildMetadataFetch = (api: ApiBuilder) => {
-	return async <T>(endpoint: string): Promise<T[]> => {
-		const fetchRes = await fetch(api(endpoint), {
-			headers: acceptJson,
-		});
-		const json: PlexMetadataResponse<T> = await fetchRes.json();
-		const data = json.MediaContainer.Metadata;
-		return Array.isArray(data) ? data : [data];
-	};
-};
-
-const plexTypes: PlexMediaTypes = {
-	season: "3",
-	episode: "4",
-};
-
-export async function collectPendingUpdates(
-	api: ApiBuilder,
-	nfo: NfoData,
-	onePaceShowKey: string,
-): Promise<UpdateData[]> {
-	const pendingUpdates: UpdateData[] = [];
-	const metadataFetch = buildMetadataFetch(api);
-
-	const seasonList = await metadataFetch<SeasonPlexData>(
-		`library/metadata/${onePaceShowKey}/children`,
-	);
-	for (const season of seasonList) {
-		const seasonNum = Number(season.index);
-
-		const sNfo = nfo.seasons.get(seasonNum);
-		if (!sNfo) {
-			console.error("Missing data for season " + seasonNum);
-			exit();
-		}
-		if (sNfo.title !== season.title) {
-			pendingUpdates.push({
-				id: season.ratingKey,
-				type: plexTypes.season,
-				title: sNfo.title,
-			});
-		}
-
-		const epNfoMap = nfo.episodes.get(seasonNum);
-		if (!epNfoMap) {
-			console.error("Missing episode data for season " + seasonNum);
-			exit();
-		}
-
-		const epList = await metadataFetch<EpisodePlexData>(
-			`library/metadata/${season.ratingKey}/children`,
-		);
-
-		for (const ep of epList) {
-			const epNum = Number(ep.index);
-			const epNfo = epNfoMap.get(epNum);
-			if (!epNfo) {
-				console.error(
-					"Missing data for episode s" + seasonNum + "e" + epNum,
-				);
-				exit();
-			}
-			if (!(epNfo.title === ep.title && epNfo.plot === ep.summary)) {
-				pendingUpdates.push({
-					id: ep.ratingKey,
-					type: plexTypes.episode,
-					title: epNfo.title,
-					summary: epNfo.plot,
-				});
-			}
-		}
-	}
-	return pendingUpdates;
-}
-
-const baseCount: ResultCounts = {
-	seasons: 0,
-	episodes: 0,
-};
-export const emptyResults = (): Results => ({
-	error: { ...baseCount },
-	success: { ...baseCount },
-});
-
-export const logCodes = {
-	ok: "\x1b[32m [ OK ] \x1b[0m",
-	fail: "\x1b[31m [FAIL] \x1b[0m",
-};
-export function logResult(
-	res: Response,
-	type: UpdateData["type"],
-	title: string,
-	results: Results,
-) {
-	const resKey: keyof ResultCounts = type === "3" ? "seasons" : "episodes";
-	const {
-		resBucketKey,
-		logCode,
-	}: { resBucketKey: keyof Results; logCode: string } =
-		res.status === 200
-			? {
-					resBucketKey: "success",
-					logCode: logCodes.ok,
-				}
-			: {
-					resBucketKey: "error",
-					logCode: logCodes.fail,
-				};
-
-	console.log(`${logCode}${title}`);
-	results[resBucketKey][resKey] += 1;
-	return results;
+  console.log("\nPlease copy the following to your .env file then rerun:\n");
+  console.log(`PLEX_LIBRARY_KEY=${foundLibKey}`);
+  console.log(`PLEX_ONE_PACE_KEY=${foundShowKey}`);
 }
