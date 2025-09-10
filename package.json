@@ -10,7 +10,9 @@
   },
   "private": true,
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run index.ts",
+    "update": "git submodule update --remote",
+    "rename": "bun run index.ts -r"
   },
   "type": "module"
 }
