@@ -18,6 +18,9 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2.0.2
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Build executable
         run: bun build --compile ./index.ts --target=bun-${{matrix.os}} --outfile dist/oppa-${{ matrix.os }}
 
