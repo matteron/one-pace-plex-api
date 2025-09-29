@@ -49,14 +49,16 @@ jobs:
       - name: Make files executable (Linux/Mac)
         run: chmod +x oppa-* || true
 
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: ${{ github.event.inputs.version }}
-      #     name: Release ${{ github.event.inputs.version }}
-      #     draft: false
-      #     prerelease: false
-      #     files: |
-      #       app-linux
-      #       app-windows.exe
-      #       app-macos
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            oppa-darwin-arm64
+            oppa-darwin-x64
+            oppa-linux-arm64
+            oppa-linux-x64
+            oppa-windows-x64.exe
