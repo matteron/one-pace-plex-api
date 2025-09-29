@@ -1,5 +1,5 @@
 import path from "node:path";
-import { loadEpisodesByHash } from "./data";
+import { episodes } from "../OnePaceOrganizer/metadata/data.json";
 import { readdir, rename } from "node:fs/promises";
 
 const hashRegex = /.*\[(.*)\]\./;
@@ -9,8 +9,7 @@ type Rename = {
   to: string;
 };
 
-export async function renameEpisodes(subModulePath: string, directory: string) {
-  const data = await loadEpisodesByHash(subModulePath);
+export async function renameEpisodes(directory: string) {
   const files = await readdir(directory);
 
   const res: Rename[] = [];
@@ -19,13 +18,13 @@ export async function renameEpisodes(subModulePath: string, directory: string) {
     if (!match) {
       continue;
     }
-    const hash = match[1]!;
-    const ep = data[hash];
+    const hash = match[1]! as keyof typeof episodes;
+    const ep = episodes[hash];
     if (!ep) {
       console.log("Data not found for: " + file);
       continue;
     }
-    const s = ep.season.toString().padStart(2, "0");
+    const s = ep.arc.toString().padStart(2, "0");
     const e = ep.episode.toString().padStart(2, "0");
     const title = ep.title;
     const fileName = `One Pace - S${s}E${e} - ${title}.mkv`;

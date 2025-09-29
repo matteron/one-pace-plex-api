@@ -25,6 +25,10 @@ export async function keyWizard(api: ApiBuilder) {
     type: string;
     title: string;
   };
+  const test = await fetch(api("library/sections"), {
+    headers: acceptJson,
+  });
+  console.log(test.status);
   const libraries: Library[] = (
     (await (
       await fetch(api("library/sections"), {

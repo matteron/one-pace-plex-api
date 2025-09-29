@@ -6,7 +6,7 @@
     "yaml": "^2.8.1"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.8.3"
   },
   "private": true,
   "scripts": {

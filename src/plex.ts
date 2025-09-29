@@ -1,5 +1,3 @@
-import { loadData } from "./data";
-import { findPosters } from "./posters";
 import type {
   EpisodePlexData,
   ApiBuilder,
@@ -12,12 +10,9 @@ import type {
   LoadPoster,
 } from "./types";
 import { buildMetadataFetch, keyWizard } from "./util";
+import data from "../OnePaceOrganizer/metadata/data.json";
 
-export async function plexData(
-  subModulePath: string,
-  includePosters: boolean,
-  useAltTvPoster: boolean,
-) {
+export async function plexData(includePosters: boolean) {
   const url = process.env.PLEX_URL;
   if (!url) {
     console.error("Missing PLEX_URL environment variable.");
@@ -43,8 +38,6 @@ export async function plexData(
 
   console.log("\x1b[33mGathering changes...\x1b[0m");
 
-  const data = await loadData(subModulePath);
-  const posters = await findPosters(subModulePath, useAltTvPoster);
   const metaFetch = buildMetadataFetch(api);
 
   const toUpdate: UpdateData[] = [];
@@ -58,8 +51,8 @@ export async function plexData(
     process.exit();
   }
 
-  const updateShow = determineUpdate(show, data.show, "title", [
-    ["title", "title"],
+  const updateShow = determineUpdate(show, data.tvshow, "originaltitle", [
+    ["title", "originaltitle"],
     ["summary", "plot"],
     ["originallyAvailableAt", "releasedate"],
   ]);
@@ -70,9 +63,9 @@ export async function plexData(
 
   if (includePosters) {
     toPoster.push({
-      logTitle: data.show.title + " (Poster)",
+      logTitle: data.tvshow.title + " (Poster)",
       id: show.ratingKey,
-      poster: posters.tvshow,
+      poster: posterLoader("./OnePaceOrganizer/posters/poster.png"),
     });
   }
 
@@ -81,17 +74,17 @@ export async function plexData(
   );
 
   for (const season of seasons) {
-    const info = data.seasons[season.index];
+    const info = data.arcs[season.index];
     if (!info) {
       continue;
     }
-    const sLogTitle = `S${season.index} - ${info.season.title}`;
+    const sLogTitle = `S${season.index} - ${info.title}`;
     const updateSeason = determineUpdate(
       season,
       {
         logTitle: sLogTitle,
-        title: info.season.title + ` (${season.index})`,
-        summary: info.season.saga + "\n\n" + info.season.description,
+        title: info.title + ` (${season.index})`,
+        summary: info.saga + "\n\n" + info.description,
       },
       "logTitle",
       [
@@ -103,38 +96,39 @@ export async function plexData(
       toUpdate.push(updateSeason);
     }
     if (includePosters) {
-      const poster = posters.seasons[season.index] as LoadPoster | undefined;
-      if (poster) {
-        toPoster.push({
-          logTitle: sLogTitle + " (Poster)",
-          id: season.ratingKey,
-          poster,
-        });
-      } else {
-        console.error(
-          `Missing Poster for Season ${season.index}: ${info.season.title}`,
-        );
-      }
+      toPoster.push({
+        logTitle: sLogTitle + " (Poster)",
+        id: season.ratingKey,
+        poster: posterLoader("./OnePaceOrganizer/" + info.poster),
+      });
     }
     const episodes = await metaFetch<EpisodePlexData>(
       `library/metadata/${season.ratingKey}/children`,
     );
     for (const episode of episodes) {
-      const epInfo = info.episodes[episode.index];
+      const epIndex = episode.index
+        .toString()
+        .padStart(2, "0") as keyof (typeof data)["arcs"][number]["episodes"];
+      const epHashes = info.episodes[epIndex];
+      if (!epHashes) {
+        continue;
+      }
+      const crc32 = epHashes.crc32 as keyof (typeof data)["episodes"];
+      const epInfo = data.episodes[crc32];
       if (!epInfo) {
         continue;
       }
       const updateEpisode = determineUpdate(
         episode,
         {
-          logTitle: `S${epInfo.season}E${epInfo.episode} - ${epInfo.title}`,
+          logTitle: `S${epInfo.arc}E${epInfo.episode} - ${epInfo.title}`,
           title: epInfo.title,
           summary:
             epInfo.description +
-            `\n\nManga Chapter${pluralize(epInfo.manga_chapters)}: ` +
-            epInfo.manga_chapters +
-            `\n\nAnime Episode${pluralize(epInfo.anime_episodes)}: ` +
-            epInfo.anime_episodes,
+            `\n\nManga Chapter${pluralize(epInfo.chapters)}: ` +
+            epInfo.chapters +
+            `\n\nAnime Episode${pluralize(epInfo.episodes)}: ` +
+            epInfo.episodes,
         },
         "logTitle",
         [
@@ -339,4 +333,8 @@ function logResult(
   console.log(`${logCode}${title}`);
   results[resBucketKey][type] += 1;
   return results;
+}
+
+function posterLoader(path: string): LoadPoster {
+  return async () => await Bun.file(path).bytes();
 }

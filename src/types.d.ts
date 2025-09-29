@@ -1,5 +1,63 @@
 export type ApiBuilder = (endpoint: string, params?: URLSearchParams) => string;
 
+export type TvShow = {
+  title: string;
+  sorttitle: string;
+  originaltitle: string;
+  genre: string[];
+  premiered: string;
+  releasedate: string;
+  season: string;
+  episode: string;
+  status: string;
+  year: string;
+  plot: string;
+  lockdata: string;
+  customrating: string;
+};
+
+export type Arc = {
+  part: number;
+  saga: string;
+  title: string;
+  originaltitle: string;
+  description: string;
+  poster: string;
+  episodes: {
+    [ep: string]: {
+      crc32: string;
+      crc32_extended: string;
+    };
+  };
+};
+
+export type Episode = {
+  arc: number;
+  episode: number;
+  title: string;
+  sorttile: string;
+  description: string;
+  chapters: string;
+  episodes: string;
+  released: string;
+  hashes: {
+    crc32: string;
+  };
+};
+
+export type EpisodeMap = {
+  [crc32: string]: Episode;
+};
+
+export type OnePaceOrganizerData = {
+  last_update: string;
+  last_update_ts: number;
+  base_url: string;
+  tvshow: TvShow;
+  arcs: [];
+  episodes: {};
+};
+
 export type TvShowYaml = {
   title: string;
   sorttitle: string;
