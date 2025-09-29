@@ -4,7 +4,9 @@ This is an alternative way to add nice metadata to the One Pace project in Plex 
 
 You'll have to rerun this script every time you add new episodes, it won't automatically keeps things up to date.
 
-Uses the data extracted by the [OnePaceOrganizer](https://github.com/ladyisatis/OnePaceOrganizer) project.
+Uses the data from the wonderful [OnePaceOrganizer](https://github.com/ladyisatis/OnePaceOrganizer) project.
+If you want a nice and easy time (with GUI!) you should probably go with the original project.
+This is for my own 'workflow' primarily.
 
 ## Instructions
 
@@ -12,7 +14,7 @@ Uses the data extracted by the [OnePaceOrganizer](https://github.com/ladyisatis/
 Script was built using [bun](https://bun.sh);
 
 ### 1. Clone Repo
-Project included OnePaceOrganizer as a submodule.  So in order to clone it, you should use.
+Project includes OnePaceOrganizer as a submodule.  So in order to clone it, you should use.
 ```bash
 git clone --recurse-submodules git@github.com:matteron/one-pace-plex-api.git
 ```
@@ -54,7 +56,7 @@ There's a few optional arguments you can pass in for different functionality.
 ### 4 (Optional). Update data and rerun
 For future runs, you can update the data from OnePaceOrganizer with
 ```bash
-git submodule update
+bun run update
 ```
 Then just `bun start` again.
 
