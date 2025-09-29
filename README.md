@@ -20,18 +20,13 @@ git clone --recurse-submodules git@github.com:matteron/one-pace-plex-api.git
 ```
 
 ### 2. Project setup
-
-Install the yaml parser dependecy with
-```bash
-bun i
-```
-
 Create a .env file at the root of this project with the following keys and your values.
 ``` bash
 PLEX_URL=<Plex local or remote url>
 PLEX_TOKEN=<Plex Auth Token>
 PLEX_LIBRARY_KEY=<Optional to start>
 PLEX_ONE_PACE_KEY=<Optional to start>
+DATA_REPO=<Optional: Alternative github repository to pull data from>
 ```
 The plex auth token can be found with this [guide](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/).
 

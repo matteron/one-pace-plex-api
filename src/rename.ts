@@ -1,6 +1,7 @@
 import path from "node:path";
-import { episodes } from "../OnePaceOrganizer/metadata/data.json";
 import { readdir, rename } from "node:fs/promises";
+import type { EpisodeMap, OnePaceOrganizerData } from "./types";
+import { data_endpoint_builder } from "./util";
 
 const hashRegex = /.*\[(.*)\]\./;
 
@@ -12,14 +13,19 @@ type Rename = {
 export async function renameEpisodes(directory: string) {
   const files = await readdir(directory);
 
+  const data_endpoint = data_endpoint_builder();
+  const data: OnePaceOrganizerData = await (
+    await fetch(data_endpoint("raw/refs/heads/main/metadata/data.min.json"))
+  ).json();
+
   const res: Rename[] = [];
   for (const file of files) {
     const match = file.match(hashRegex);
     if (!match) {
       continue;
     }
-    const hash = match[1]! as keyof typeof episodes;
-    const ep = episodes[hash];
+    const hash = match[1]! as keyof EpisodeMap;
+    const ep = data.episodes[hash];
     if (!ep) {
       console.log("Data not found for: " + file);
       continue;
