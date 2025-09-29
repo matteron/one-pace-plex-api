@@ -1,0 +1,59 @@
+name: Build and Release executables
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Enter version number (e.g. v1.0.0)"
+        required: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [linux-x64, linux-arm64, windows-x64, darwin-x64, darwin-arm64]
+
+    runs-on: macos-latest
+    steps:
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2.0.2
+
+      - name: Build executable
+        run: bun build --compile ./index.ts --target=bun-${{matrix.os}} --outfile dist/oppa-${{ matrix.os }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oppa-${{ matrix.os }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: List downloaded files (Debugging)
+        run: ls -R
+
+      - name: Make files executable (Linux/Mac)
+        run: chmod +x oppa-* || true
+
+      # - name: Create GitHub Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     tag_name: ${{ github.event.inputs.version }}
+      #     name: Release ${{ github.event.inputs.version }}
+      #     draft: false
+      #     prerelease: false
+      #     files: |
+      #       app-linux
+      #       app-windows.exe
+      #       app-macos
