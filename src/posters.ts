@@ -1,4 +1,4 @@
-import { readdir } from "node:fs/promises";
+import { readdir, lstat } from "node:fs/promises";
 import path from "node:path";
 import type { LoadPoster } from "./types";
 
@@ -19,8 +19,12 @@ export async function findPosters(
     seasons: [],
   };
   for (const file of files) {
-    const loader: LoadPoster = async () =>
-      await Bun.file(path.join(posterPath, file)).bytes();
+    const fullPath = path.join(posterPath, file);
+    const stats = await lstat(fullPath);
+    if (!stats.isFile()) {
+      continue;
+    }
+    const loader: LoadPoster = async () => await Bun.file(fullPath).bytes();
     const match = posterRegex.exec(file);
     if (match) {
       const season = +match[1];
