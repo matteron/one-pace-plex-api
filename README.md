@@ -42,7 +42,7 @@ Just run the script again to update data.
 There's a few optional arguments you can pass in for different functionality.
 | Argument | Operation |
 | --- | --- |
-| -r "path" | Rename files in "path" directory based on file's hash code. |
+| -r "path" | Rename files in the "path" directory based on file's hash code. |
 | -p | Set show and season posters in plex |
 
 ## Notes
