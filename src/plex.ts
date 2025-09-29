@@ -1,16 +1,14 @@
 import type {
   EpisodePlexData,
   ApiBuilder,
-  PlexData,
   SeasonPLexData,
   ShowPlexData,
   UpdateData,
   AnyPlexData,
   UpdatePoster,
-  LoadPoster,
+  OnePaceOrganizerData,
 } from "./types";
-import { buildMetadataFetch, keyWizard } from "./util";
-import data from "../OnePaceOrganizer/metadata/data.json";
+import { buildMetadataFetch, data_endpoint_builder, keyWizard } from "./util";
 
 export async function plexData(includePosters: boolean) {
   const url = process.env.PLEX_URL;
@@ -35,6 +33,11 @@ export async function plexData(includePosters: boolean) {
     await keyWizard(api);
     return;
   }
+
+  const data_endpoint = data_endpoint_builder();
+  const data: OnePaceOrganizerData = await (
+    await fetch(data_endpoint("raw/refs/heads/main/metadata/data.min.json"))
+  ).json();
 
   console.log("\x1b[33mGathering changes...\x1b[0m");
 
@@ -61,11 +64,18 @@ export async function plexData(includePosters: boolean) {
     toUpdate.push(updateShow);
   }
 
+  const poster_endpoint = (png: string) => {
+    return data_endpoint(
+      `/blob/main/${png}`,
+      new URLSearchParams([["raw", "true"]]),
+    );
+  };
+
   if (includePosters) {
     toPoster.push({
       logTitle: data.tvshow.title + " (Poster)",
       id: show.ratingKey,
-      poster: posterLoader("./OnePaceOrganizer/posters/poster.png"),
+      poster: poster_endpoint("posters/poster.png"),
     });
   }
 
@@ -99,7 +109,8 @@ export async function plexData(includePosters: boolean) {
       toPoster.push({
         logTitle: sLogTitle + " (Poster)",
         id: season.ratingKey,
-        poster: posterLoader("./OnePaceOrganizer/" + info.poster),
+        // poster: poster_endpoint(info.poster),
+        poster: poster_endpoint(`posters/${info.part}/poster.png`),
       });
     }
     const episodes = await metaFetch<EpisodePlexData>(
@@ -229,13 +240,15 @@ export async function plexData(includePosters: boolean) {
   }
 
   for (const { id, poster, logTitle } of toPoster) {
-    const updateRes = await fetch(api(`/library/metadata/${id}/posters`), {
-      method: "POST",
-      headers: {
-        "Content-Type": "image/*",
+    const updateRes = await fetch(
+      api(
+        `/library/metadata/${id}/posters`,
+        new URLSearchParams([["url", poster]]),
+      ),
+      {
+        method: "POST",
       },
-      body: await poster(),
-    });
+    );
     results = logResult(updateRes, "poster", logTitle, results);
   }
 
@@ -333,8 +346,4 @@ function logResult(
   console.log(`${logCode}${title}`);
   results[resBucketKey][type] += 1;
   return results;
-}
-
-function posterLoader(path: string): LoadPoster {
-  return async () => await Bun.file(path).bytes();
 }

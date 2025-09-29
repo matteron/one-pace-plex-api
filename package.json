@@ -2,8 +2,7 @@
   "name": "one_pace_rename",
   "module": "index.ts",
   "devDependencies": {
-    "@types/bun": "latest",
-    "yaml": "^2.8.1"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"

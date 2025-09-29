@@ -6,36 +6,29 @@ You'll have to rerun this script every time you add new episodes, it won't autom
 
 Uses the data from the wonderful [OnePaceOrganizer](https://github.com/ladyisatis/OnePaceOrganizer) project.
 If you want a nice and easy time (with GUI!) you should probably go with the original project.
-This is for my own 'workflow' primarily.
+
+This script is for my own 'workflow' really.
 
 ## Instructions
 
-### 0. Install bun
+### 0. Install bun and clone repo
 Script was built using [bun](https://bun.sh);
 
-### 1. Clone Repo
-Project includes OnePaceOrganizer as a submodule.  So in order to clone it, you should use.
-```bash
-git clone --recurse-submodules git@github.com:matteron/one-pace-plex-api.git
-```
-
-### 2. Project setup
-
-Install the yaml parser dependecy with
-```bash
-bun i
-```
-
-Create a .env file at the root of this project with the following keys and your values.
+### 1. Project setup
+Create a `.env` file at the root of this project with the following keys and your values.
 ``` bash
 PLEX_URL=<Plex local or remote url>
 PLEX_TOKEN=<Plex Auth Token>
 PLEX_LIBRARY_KEY=<Optional to start>
 PLEX_ONE_PACE_KEY=<Optional to start>
+DATA_REPO=<Optional github repository for data>
 ```
 The plex auth token can be found with this [guide](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/).
 
-The script will guide you through getting your library keys and one pace key if they are missing.
+The script will guide you through getting `PLEX_LIBRARY_KEY` and `PLEX_ONE_PACE_KEY` if they are missing from the `.env` File.
+
+The `DATA_REPO` is the github repository in case you want to use a fork of the project for metadata.
+Default value is `ladyisatis/OnePaceOrganizer`.
 
 ### 3. Run the script
 ```bash
@@ -45,20 +38,12 @@ bun start
 As previously mentioned, the script will help you get your library and show keys, then will quit.
 Just run the script again to update data.
 
-### 4 (Optional) Extra Arguments
+### Arguments
 There's a few optional arguments you can pass in for different functionality.
 | Argument | Operation |
 | --- | --- |
-| --r <path> | Rename files in <path> directory based on file's hash code. |
-| --p | Set show and season posters in plex |
-| --altShowPoster | Use the tvshow-alt.png poster |
-
-### 4 (Optional). Update data and rerun
-For future runs, you can update the data from OnePaceOrganizer with
-```bash
-bun run update
-```
-Then just `bun start` again.
+| -r "path" | Rename files in the "path" directory based on file's hash code. |
+| -p | Set show and season posters in plex |
 
 ## Notes
 

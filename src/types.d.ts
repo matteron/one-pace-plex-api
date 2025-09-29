@@ -54,8 +54,8 @@ export type OnePaceOrganizerData = {
   last_update_ts: number;
   base_url: string;
   tvshow: TvShow;
-  arcs: [];
-  episodes: {};
+  arcs: Arc[];
+  episodes: EpisodeMap;
 };
 
 export type TvShowYaml = {
@@ -148,9 +148,8 @@ export type UpdateData = {
   summary?: string;
 } & SpecificData;
 
-export type LoadPoster = () => Promise<Uint8Array>;
 export type UpdatePoster = {
   logTitle: string;
   id: string;
-  poster: LoadPoster;
+  poster: string;
 };

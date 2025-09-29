@@ -81,3 +81,12 @@ export async function keyWizard(api: ApiBuilder) {
   console.log(`PLEX_LIBRARY_KEY=${foundLibKey}`);
   console.log(`PLEX_ONE_PACE_KEY=${foundShowKey}`);
 }
+
+export function data_endpoint_builder(): ApiBuilder {
+  const data_repo = process.env.DATA_REPO ?? "ladyisatis/OnePaceOrganizer";
+  console.log(`Fetching Data from github.com/\x1b[35m${data_repo}\x1b[0m`);
+
+  return (endpoint, params) => {
+    return `https://github.com/${data_repo}/${endpoint}${params ? "?" + params.toString() : ""}`;
+  };
+}
