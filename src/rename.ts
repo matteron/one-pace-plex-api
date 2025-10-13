@@ -15,7 +15,7 @@ export async function renameEpisodes(directory: string) {
 
   const data_endpoint = data_endpoint_builder();
   const data: OnePaceOrganizerData = await (
-    await fetch(data_endpoint("raw/refs/heads/main/metadata/data.min.json"))
+    await fetch(data_endpoint("raw/refs/heads/main/data.min.json"))
   ).json();
 
   const res: Rename[] = [];

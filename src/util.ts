@@ -83,7 +83,7 @@ export async function keyWizard(api: ApiBuilder) {
 }
 
 export function data_endpoint_builder(): ApiBuilder {
-  const data_repo = process.env.DATA_REPO ?? "ladyisatis/OnePaceOrganizer";
+  const data_repo = process.env.DATA_REPO ?? "ladyisatis/one-pace-metadata";
   console.log(`Fetching Data from github.com/\x1b[35m${data_repo}\x1b[0m`);
 
   return (endpoint, params) => {
