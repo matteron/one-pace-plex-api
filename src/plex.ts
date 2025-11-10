@@ -8,7 +8,12 @@ import type {
   UpdatePoster,
   OnePaceOrganizerData,
 } from "./types";
-import { buildMetadataFetch, data_endpoint_builder, keyWizard } from "./util";
+import {
+  buildMetadataFetch,
+  data_endpoint_builder,
+  keyWizard,
+  poster_endpoint_builder,
+} from "./util";
 
 export async function plexData(includePosters: boolean) {
   const url = process.env.PLEX_URL;
@@ -34,9 +39,8 @@ export async function plexData(includePosters: boolean) {
     return;
   }
 
-  const data_endpoint = data_endpoint_builder();
   const data: OnePaceOrganizerData = await (
-    await fetch(data_endpoint("raw/refs/heads/main/data.min.json"))
+    await fetch(data_endpoint_builder()("raw/refs/heads/main/data.min.json"))
   ).json();
 
   console.log("\x1b[33mGathering changes...\x1b[0m");
@@ -65,7 +69,8 @@ export async function plexData(includePosters: boolean) {
   }
 
   const poster_endpoint = (png: string) => {
-    return data_endpoint(
+    const endpoint = poster_endpoint_builder();
+    return endpoint(
       `/blob/main/${png}`,
       new URLSearchParams([["raw", "true"]]),
     );

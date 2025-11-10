@@ -22,13 +22,17 @@ PLEX_TOKEN=<Plex Auth Token>
 PLEX_LIBRARY_KEY=<Optional to start>
 PLEX_ONE_PACE_KEY=<Optional to start>
 DATA_REPO=<Optional github repository for data>
+POSTER_REPO=<Optional github repository for posters>
 ```
 The plex auth token can be found with this [guide](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/).
 
 The script will guide you through getting `PLEX_LIBRARY_KEY` and `PLEX_ONE_PACE_KEY` if they are missing from the `.env` File.
 
 The `DATA_REPO` is the github repository in case you want to use a fork of the project for metadata.
-Default value is `ladyisatis/OnePaceOrganizer`.
+Default value is `ladyisatis/one-pace-metadata`.
+
+The `POSTER_REPO` is the github repository for an alternative source for posters.
+Default value is `ladyisatis/OnePaceOrganizer`
 
 ### 3. Run the script
 ```bash

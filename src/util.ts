@@ -90,3 +90,12 @@ export function data_endpoint_builder(): ApiBuilder {
     return `https://github.com/${data_repo}/${endpoint}${params ? "?" + params.toString() : ""}`;
   };
 }
+
+export function poster_endpoint_builder(): ApiBuilder {
+  const data_repo = process.env.POSTER_REPO ?? "ladyisatis/OnePaceOrganizer";
+  console.log(`Fetching Posters from github.com/\x1b[35m${data_repo}\x1b[0m`);
+
+  return (endpoint, params) => {
+    return `https://github.com/${data_repo}/${endpoint}${params ? "?" + params.toString() : ""}`;
+  };
+}
