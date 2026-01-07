@@ -7,6 +7,7 @@ import type {
   AnyPlexData,
   UpdatePoster,
   OnePaceOrganizerData,
+  HashLookup,
 } from "./types";
 import {
   buildMetadataFetch,
@@ -44,6 +45,15 @@ export async function plexData(includePosters: boolean) {
   ).json();
 
   console.log("\x1b[33mGathering changes...\x1b[0m");
+
+  const hashLookup: HashLookup = {};
+  for (const key in data.episodes) {
+    const ep = data.episodes[key];
+    if (!hashLookup[ep.arc]) {
+      hashLookup[ep.arc] = {};
+    }
+    hashLookup[ep.arc][ep.episode] = key;
+  }
 
   const metaFetch = buildMetadataFetch(api);
 
@@ -122,15 +132,11 @@ export async function plexData(includePosters: boolean) {
       `library/metadata/${season.ratingKey}/children`,
     );
     for (const episode of episodes) {
-      const epIndex = episode.index
-        .toString()
-        .padStart(2, "0") as keyof (typeof data)["arcs"][number]["episodes"];
-      const epHashes = info.episodes[epIndex];
-      if (!epHashes) {
+      const epHash = hashLookup[info.part][episode.index];
+      if (!epHash) {
         continue;
       }
-      const crc32 = epHashes.crc32 as keyof (typeof data)["episodes"];
-      const epInfo = data.episodes[crc32];
+      const epInfo = data.episodes[epHash];
       if (!epInfo) {
         continue;
       }

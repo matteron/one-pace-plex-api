@@ -23,12 +23,6 @@ export type Arc = {
   originaltitle: string;
   description: string;
   poster: string;
-  episodes: {
-    [ep: string]: {
-      crc32: string;
-      crc32_extended: string;
-    };
-  };
 };
 
 export type Episode = {
@@ -152,4 +146,10 @@ export type UpdatePoster = {
   logTitle: string;
   id: string;
   poster: string;
+};
+
+export type HashLookup = {
+  [arc: number]: {
+    [episode: number]: string;
+  };
 };
