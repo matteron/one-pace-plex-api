@@ -1,5 +1,8 @@
 # One Pace Plex Metadata
 
+> [!NOTE]
+> Migrated to [Codeberg](https://codeberg.org/mattia_id/one-pace-plex-api)
+
 This is an alternative way to add nice metadata to the One Pace project in Plex using the Plex api instead of the XBMCnfoTVImporter plugin.
 
 You'll have to rerun this script every time you add new episodes, it won't automatically keeps things up to date.
